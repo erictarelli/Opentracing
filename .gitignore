@@ -1,0 +1,14 @@
+################################################################################
+# Este archivo .gitignore ha sido creado automáticamente por Microsoft(R) Visual Studio.
+################################################################################
+
+/ConsoleApp.Example/bin
+/ConsoleApp.Example/obj
+/ConsoleApp.Example.Http/bin
+/ConsoleApp.Example.Http/obj
+/WebApi.Example.A/bin
+/WebApi.Example.A/obj
+/WebApi.Example.B/bin
+/WebApi.Example.B/obj
+/wpf.test.with.jaeger/bin
+/wpf.test.with.jaeger/obj
