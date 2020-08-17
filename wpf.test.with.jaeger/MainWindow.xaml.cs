@@ -1,7 +1,10 @@
 ﻿using OpenTracing;
+using OpenTracing.Tag;
+using OpenTracing.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,27 +25,46 @@ namespace wpf.test.with.jaeger
     public partial class MainWindow : Window
     {
         private readonly ITracer _tracer;
-        public MainWindow()
+        public MainWindow(ITracer tracer)
         {
-            using (var tracer = Tracing.InitTracer("wpf-test"))
-            {
-                using (var scope = tracer.BuildSpan("say-hello").StartActive(true))
-                {
-                    //var helloString = await FormatString(helloTo);
-
-                    //Console.WriteLine(helloString);
-                }
-                //new Program(tracer).SayHello("Eric");
-            }
-            //_tracer = Tracing.InitTracer("wpf-test");
             InitializeComponent();
+            _tracer = tracer;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            using (var scope = _tracer.BuildSpan("simple-test").StartActive(true))
-            { 
-                Console.WriteLine("iam testing jaeger");
+            using (var scopeFirst = _tracer.BuildSpan("example-with-wpf").StartActive(true))
+            {
+                var url = $"https://localhost:5001/api/examplea";
+
+                using (var scope = _tracer.BuildSpan("HTTP GET")
+                    .WithTag(Tags.HttpMethod, "GET")
+                    .WithTag(Tags.HttpUrl, $"{url}")
+                    .StartActive(true))
+                {
+
+                    var helloString = string.Empty;
+       
+                    try
+                    {
+                        HttpClient client = new HttpClient();
+                        var response = await client.GetAsync(url);
+
+                        lbl_traceid.Content = GlobalTracer.Instance.ActiveSpan.Context.TraceId;
+                    }
+                    catch (Exception ex)
+                    {
+
+                        helloString = ex.ToString();
+                    }
+
+
+                    scope.Span.Log(new Dictionary<string, object>
+                    {
+                        [LogFields.Event] = "string.Format",
+                        ["value"] = helloString
+                    });
+                }
             }
         }
     }

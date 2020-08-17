@@ -44,7 +44,7 @@ namespace WebApi.Example.A.Controllers
             if (string.IsNullOrEmpty(alumno.Email))
             {
                 HttpClient client = new HttpClient();
-                var response = await client.GetAsync($"https://localhost:5003/api/email?nombre={alumno.Nombre}&apellido={alumno.Apellido}");
+                var response = await client.GetAsync($"https://localhost:5003/api/exampleb?nombre={alumno.Nombre}&apellido={alumno.Apellido}");
                 alumno.Email = await response.Content.ReadAsStringAsync();
             }
             _db.Set<TblAlumno>().AddRange(alumno);

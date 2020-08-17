@@ -21,7 +21,7 @@ namespace WebApi.Example.A
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            Tracing.InitTracer("Api.A.Ms");
+            Tracing.InitTracer("example-a");
             services.AddTransient<JaegerExampleContext>();
             services.AddOpenTracing();
         }

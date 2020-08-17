@@ -8,6 +8,7 @@
         Title="MainWindow" Height="250" Width="250">
     <Grid>
         <Button Content="Button" HorizontalAlignment="Left" Height="22" Margin="31,35,0,0" VerticalAlignment="Top" Width="37" Click="Button_Click"/>
+        <Label x:Name="lbl_traceid" Content="Label" HorizontalAlignment="Left" Height="29" Margin="73,97,0,0" VerticalAlignment="Top" Width="52"/>
 
     </Grid>
 </Window>
