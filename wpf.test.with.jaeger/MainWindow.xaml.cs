@@ -1,4 +1,5 @@
 ﻿using OpenTracing;
+using OpenTracing.Propagation;
 using OpenTracing.Tag;
 using OpenTracing.Util;
 using System;
@@ -33,39 +34,46 @@ namespace wpf.test.with.jaeger
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            using (var scopeFirst = _tracer.BuildSpan("example-with-wpf").StartActive(true))
-            {
-                var url = $"https://localhost:5001/api/examplea";
 
-                using (var scope = _tracer.BuildSpan("HTTP GET")
-                    .WithTag(Tags.HttpMethod, "GET")
-                    .WithTag(Tags.HttpUrl, $"{url}")
-                    .StartActive(true))
+            var url = $"https://localhost:5001/api/examplea";
+
+            using (var scope = _tracer.BuildSpan("HTTP GET").StartActive(true))
+            {
+                var helloString = string.Empty;
+
+                try
+                {
+                    HttpClient client = new HttpClient();
+
+                    scope.Span
+                        .SetTag(Tags.SpanKind, Tags.SpanKindClient)
+                        .SetTag(Tags.HttpMethod, "GET")
+                        .SetTag(Tags.HttpUrl, url);
+
+                    var dictionary = new Dictionary<string, string>();
+
+                    _tracer.Inject(scope.Span.Context, BuiltinFormats.HttpHeaders, new TextMapInjectAdapter(dictionary));
+
+                    foreach (var entry in dictionary)
+                        client.DefaultRequestHeaders.Add(entry.Key, entry.Value);
+
+
+
+                    var response = await client.GetAsync(url);
+                }
+                catch (Exception ex)
                 {
 
-                    var helloString = string.Empty;
-       
-                    try
-                    {
-                        HttpClient client = new HttpClient();
-                        var response = await client.GetAsync(url);
-
-                        lbl_traceid.Content = GlobalTracer.Instance.ActiveSpan.Context.TraceId;
-                    }
-                    catch (Exception ex)
-                    {
-
-                        helloString = ex.ToString();
-                    }
-
-
-                    scope.Span.Log(new Dictionary<string, object>
-                    {
-                        [LogFields.Event] = "string.Format",
-                        ["value"] = helloString
-                    });
+                    helloString = ex.ToString();
                 }
-            }
+
+
+                scope.Span.Log(new Dictionary<string, object>
+                {
+                    [LogFields.Event] = "string.Format",
+                    ["value"] = helloString
+                });
+            }            
         }
     }
 }
